@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O'quv Markazi — O'quvchilar Boshqaruvi</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #17171a;
+    --surface2: #1e1e23;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0eff4;
+    --muted: #7a7985;
+    --accent: #6c63ff;
+    --accent2: #8b85ff;
+    --green: #22c87a;
+    --green-bg: rgba(34,200,122,0.1);
+    --red: #ff5757;
+    --red-bg: rgba(255,87,87,0.1);
+    --blue: #4da6ff;
+    --blue-bg: rgba(77,166,255,0.1);
+    --amber: #ffb347;
+    --amber-bg: rgba(255,179,71,0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+  .app { max-width: 960px; margin: 0 auto; padding: 0 20px 60px; }
+
+  /* Header */
+  .header {
+    padding: 36px 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-left h1 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .header-left p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .month-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 20px;
+  }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: border-color .2s;
+  }
+  .stat:hover { border-color: var(--border2); }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 8px;
+  }
+  .stat-val {
+    font-size: 28px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: -1px;
+  }
+  .stat-val.c-green { color: var(--green); }
+  .stat-val.c-red { color: var(--red); }
+  .stat-val.c-blue { color: var(--blue); }
+  .stat-val.c-amber { color: var(--amber); }
+  .stat-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .tab {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color .15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent2); border-bottom-color: var(--accent); }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 18px;
+  }
+
+  /* Form */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .form-group input {
+    height: 40px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 0 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .form-group input:focus { border-color: var(--accent); }
+  .form-group input::placeholder { color: var(--muted); }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+
+  .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .btn {
+    height: 38px;
+    padding: 0 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    transition: all .15s;
+  }
+  .btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn.primary:hover { background: var(--accent2); border-color: var(--accent2); }
+  .btn.sm { height: 30px; padding: 0 12px; font-size: 12px; }
+  .btn.danger { color: var(--red); border-color: rgba(255,87,87,0.3); }
+  .btn.danger:hover { background: var(--red-bg); }
+  .btn.success-btn { color: var(--green); border-color: rgba(34,200,122,0.3); }
+  .btn.success-btn:hover { background: var(--green-bg); }
+  #form-msg {
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    display: none;
+  }
+  #form-msg.ok { background: var(--green-bg); color: var(--green); display: block; }
+  #form-msg.err { background: var(--red-bg); color: var(--red); display: block; }
+
+  /* Filters */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    transition: all .15s;
+  }
+  .chip:hover { color: var(--text); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .right-tools { display: flex; gap: 8px; align-items: center; }
+  select.month-sel {
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+  }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .name-cell { font-weight: 500; }
+  .tel-cell { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
+  .date-cell { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .badge.oquydi { background: var(--green-bg); color: var(--green); }
+  .badge.oquydi::before { background: var(--green); }
+  .badge.ketdi { background: var(--red-bg); color: var(--red); }
+  .badge.ketdi::before { background: var(--red); }
+
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* Ketdi modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 100%;
+    max-width: 380px;
+  }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+  .modal .form-group { margin-bottom: 16px; }
+  .modal .btn-row { justify-content: flex-end; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  
+  /* Navigation to Clock */
+  .back-nav {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="back-nav">
+    <a href="index.html" class="btn sm">← Soatga qaytish</a>
+  </div>
+  <div class="header">
+    <div class="header-left">
+      <h1>O'quv Markazi</h1>
+      <p>O'quvchilar kirim-chiqim boshqaruvi</p>
+    </div>
+    <div class="month-badge" id="cur-month"></div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('add',this)">Qo'shish</button>
+    <button class="tab" onclick="showTab('list',this)">Ro'yxat</button>
+  </div>
+
+  <!-- Add form -->
+  <div id="tab-add">
+    <div class="card">
+      <div class="card-title">Yangi o'quvchi</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Ism familiya *</label>
+          <input id="f-ism" placeholder="Abdullayev Ali Karimovich" />
+        </div>
+        <div class="form-group">
+          <label>Telefon raqami</label>
+          <input id="f-tel" placeholder="+998 90 123 45 67" />
+        </div>
+        <div class="form-group">
+          <label>Kelgan sana *</label>
+          <input type="date" id="f-keldi" />
+        </div>
+        <div class="form-group">
+          <label>Ketgan sana (ixtiyoriy)</label>
+          <input type="date" id="f-ketdi" />
+        </div>
+      </div>
+      <div class="btn-row" style="margin-bottom:12px">
+        <button class="btn primary" onclick="addOquvchi()">Qo'shish</button>
+        <button class="btn" onclick="clearForm()">Tozalash</button>
+      </div>
+      <div id="form-msg"></div>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div id="tab-list" style="display:none">
+    <div class="card">
+      <div class="filter-bar">
+        <div class="filter-chips">
+          <button class="chip active" onclick="setFilter('all',this)">Barchasi</button>
+          <button class="chip" onclick="setFilter('oquydi',this)">O'qiydi</button>
+          <button class="chip" onclick="setFilter('ketdi',this)">Ketdi</button>
+          <button class="chip" onclick="setFilter('bu-oy',this)">Bu oy keldi</button>
+        </div>
+        <div class="right-tools">
+          <select class="month-sel" id="month-sel" onchange="render()">
+            <option value="">Barcha oylar</option>
+          </select>
+          <button class="btn sm" onclick="exportCSV()">CSV ↓</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:5%">#</th>
+              <th style="width:25%">Ism familiya</th>
+              <th style="width:18%">Telefon</th>
+              <th style="width:15%">Kelgan</th>
+              <th style="width:15%">Ketgan</th>
+              <th style="width:12%">Holat</th>
+              <th style="width:10%"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="list-count" style="font-size:12px;color:var(--muted);margin-top:14px;text-align:right"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Ketdi modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Ketgan sana belgilash</h3>
+    <p id="modal-name"></p>
+    <div class="form-group">
+      <label>Ketgan sana</label>
+      <input type="date" id="modal-date" />
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="closeModal()">Bekor</button>
+      <button class="btn danger" onclick="confirmKetdi()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem('oqm_v2') || '[]');
+let filter = 'all';
+let modalIdx = -1;
+
+function save() { localStorage.setItem('oqm_v2', JSON.stringify(data)); }
+
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function formatDate(d) {
+  if (!d) return '—';
+  const [y, m, day] = d.split('-');
+  return day + '.' + m + '.' + y;
+}
+
+const monthNames = ['','Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
+
+function monthLabel(key) {
+  if (!key) return '';
+  const [y, m] = key.split('-');
+  return monthNames[+m] + ' ' + y;
+}
+
+function renderHeader() {
+  const d = new Date();
+  document.getElementById('cur-month').textContent = monthNames[d.getMonth()+1] + ' ' + d.getFullYear();
+}
+
+function renderStats() {
+  const now = today().slice(0,7);
+  const total = data.length;
+  const oquydi = data.filter(r => !r.ketdi).length;
+  const ketdi = data.filter(r => !!r.ketdi).length;
+  const keldi_bu_oy = data.filter(r => r.keldi && r.keldi.startsWith(now)).length;
+  const ketdi_bu_oy = data.filter(r => r.ketdi && r.ketdi.startsWith(now)).length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-label">Jami o'quvchi</div><div class="stat-val">${total}</div><div class="stat-sub">barcha vaqt</div></div>
+    <div class="stat"><div class="stat-label">Hozir o'qiydi</div><div class="stat-val c-blue">${oquydi}</div><div class="stat-sub">faol</div></div>
+    <div class="stat"><div class="stat-label">Bu oy keldi</div><div class="stat-val c-green">${keldi_bu_oy}</div><div class="stat-sub">yangi</div></div>
+    <div class="stat"><div class="stat-label">Bu oy ketdi</div><div class="stat-val c-red">${ketdi_bu_oy}</div><div class="stat-sub">chiqdi</div></div>
+    <div class="stat"><div class="stat-label">Jami ketdi</div><div class="stat-val c-amber">${ketdi}</div><div class="stat-sub">barcha vaqt</div></div>
+  `;
+}
+
+function renderMonthSel() {
+  const sel = document.getElementById('month-sel');
+  const cur = sel.value;
+  const months = [...new Set(data.flatMap(r => [r.keldi?.slice(0,7), r.ketdi?.slice(0,7)].filter(Boolean)))].sort().reverse();
+  sel.innerHTML = '<option value="">Barcha oylar</option>' + months.map(m =>
+    `<option value="${m}" ${m===cur?'selected':''}>${monthLabel(m)}</option>`
+  ).join('');
+}
+
+function render() {
+  renderStats();
+  renderMonthSel();
+  const mon = document.getElementById('month-sel').value;
+  const now = today().slice(0,7);
+  let rows = [...data].map((r,i) => ({...r, _i: i}));
+  if (mon) rows = rows.filter(r => (r.keldi||'').startsWith(mon) || (r.ketdi||'').startsWith(mon));
+  if (filter === 'oquydi') rows = rows.filter(r => !r.ketdi);
+  else if (filter === 'ketdi') rows = rows.filter(r => !!r.ketdi);
+  else if (filter === 'bu-oy') rows = rows.filter(r => r.keldi && r.keldi.startsWith(now));
+
+  const tbody = document.getElementById('tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">O\'quvchi topilmadi</td></tr>';
+    document.getElementById('list-count').textContent = '';
+    return;
+  }
+  tbody.innerHTML = rows.map((r, n) => {
+    const holat = r.ketdi
+      ? '<span class="badge ketdi">Ketdi</span>'
+      : '<span class="badge oquydi">O\'qiydi</span>';
+    const ketdiBtn = !r.ketdi
+      ? `<button class="btn sm success-btn" onclick="openModal(${r._i})">Ketdi</button>`
+      : '';
+    return `<tr>
+      <td style="color:var(--muted);font-size:11px;font-family:'DM Mono',monospace">${n+1}</td>
+      <td class="name-cell">${r.ism}</td>
+      <td class="tel-cell">${r.tel||'—'}</td>
+      <td class="date-cell">${formatDate(r.keldi)}</td>
+      <td class="date-cell">${formatDate(r.ketdi)}</td>
+      <td>${holat}</td>
+      <td style="display:flex;gap:6px;align-items:center">
+        ${ketdiBtn}
+        <button class="btn sm danger" onclick="del(${r._i})">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('list-count').textContent = `${rows.length} ta o'quvchi ko'rsatilmoqda`;
+}
+
+function setFilter(f, btn) {
+  filter = f;
+  document.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function showTab(t, btn) {
+  document.getElementById('tab-add').style.display = t === 'add' ? '' : 'none';
+  document.getElementById('tab-list').style.display = t === 'list' ? '' : 'none';
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (t === 'list') render();
+}
+
+function addOquvchi() {
+  const ism = document.getElementById('f-ism').value.trim();
+  const tel = document.getElementById('f-tel').value.trim();
+  const keldi = document.getElementById('f-keldi').value;
+  const ketdi = document.getElementById('f-ketdi').value;
+  const msg = document.getElementById('form-msg');
+  msg.className = '';
+  if (!ism) { msg.className = 'err'; msg.textContent = 'Ism familiya kiritilishi shart'; return; }
+  if (!keldi) { msg.className = 'err'; msg.textContent = 'Kelgan sana kiritilishi shart'; return; }
+  data.unshift({ ism, tel, keldi, ketdi: ketdi || '' });
+  save(); clearForm();
+  msg.className = 'ok';
+  msg.textContent = `"${ism}" muvaffaqiyatli qo'shildi`;
+  setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 3000);
+  renderStats();
+}
+
+function clearForm() {
+  document.getElementById('f-ism').value = '';
+  document.getElementById('f-tel').value = '';
+  document.getElementById('f-ketdi').value = '';
+  document.getElementById('f-keldi').value = today();
+}
+
+function del(i) {
+  if (!confirm(`"${data[i].ism}" o'chirilsinmi?`)) return;
+  data.splice(i, 1); save(); render();
+}
+
+function openModal(i) {
+  modalIdx = i;
+  document.getElementById('modal-name').textContent = data[i].ism;
+  document.getElementById('modal-date').value = today();
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  modalIdx = -1;
+}
+
+function confirmKetdi() {
+  const d = document.getElementById('modal-date').value;
+  if (!d) return;
+  data[modalIdx].ketdi = d;
+  save(); render(); closeModal();
+}
+
+function exportCSV() {
+  const header = 'Ism familiya,Telefon,Kelgan sana,Ketgan sana,Holat\n';
+  const rows = data.map(r =>
+    `"${r.ism}","${r.tel}","${r.keldi}","${r.ketdi}","${r.ketdi ? 'Ketdi' : 'O\'qiydi'}"`
+  ).join('\n');
+  const blob = new Blob(['\uFEFF' + header + rows], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'oquvchilar_' + today() + '.csv'; a.click();
+}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.getElementById('f-keldi').value = today();
+renderHeader();
+renderStats();
+</script>
+</body>
+</html>
