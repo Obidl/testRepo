@@ -8,39 +8,44 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  padding: 1rem;
 }
 
 .container {
   text-align: center;
+  width: 100%;
+  max-width: 600px;
 }
 
 h1 {
   font-weight: 300;
   margin-bottom: 2rem;
   letter-spacing: 2px;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
 }
 
 .clock {
   display: flex;
   background: #e0e5ec;
-  padding: 2rem;
+  padding: clamp(1rem, 5vw, 2rem);
   border-radius: 50px;
   box-shadow: 20px 20px 60px #bec3c9,
               -20px -20px 60px #ffffff;
-  gap: 1rem;
+  gap: clamp(0.2rem, 2vw, 1rem);
   align-items: center;
+  justify-content: center;
 }
 
 .unit {
-  font-size: 4rem;
+  font-size: clamp(2rem, 10vw, 4rem);
   font-weight: bold;
   color: #444;
-  width: 100px;
+  width: clamp(60px, 15vw, 100px);
   text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
 .separator {
-  font-size: 3rem;
+  font-size: clamp(1.5rem, 8vw, 3rem);
   color: #888;
   animation: blink 1s infinite;
 }
@@ -54,4 +59,16 @@ p {
   margin-top: 2rem;
   font-size: 0.9rem;
   color: #777;
+  padding: 0 1rem;
+}
+
+/* Mobile adjustments for very small screens */
+@media (max-width: 350px) {
+  .clock {
+    padding: 0.8rem;
+    border-radius: 30px;
+  }
+  .unit {
+    width: 50px;
+  }
 }
