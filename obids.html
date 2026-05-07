@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obid's App — Mebel Galereyasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Geist+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   TOKENS
+══════════════════════════════════════ */
+:root {
+  --white:   #ffffff;
+  --off:     #fafafa;
+  --g50:     #f5f5f5;
+  --g100:    #ebebeb;
+  --g200:    #d6d6d6;
+  --g400:    #a3a3a3;
+  --g600:    #557575;
+  --g800:    #262626;
+  --g900:    #0f0f0f;
+  --blue:    #1d4ed8;
+  --blue-l:  #dbeafe;
+  --red:     #ef4444;
+  --red-l:   #fee2e2;
+  --yellow:  #fbbf24;
+  --serif:   'DM Serif Display', Georgia, serif;
+  --mono:    'Geist Mono', 'Courier New', monospace;
+  --sans:    'DM Sans', system-ui, sans-serif;
+  --r:       6px;
+  --r-lg:    12px;
+  --ease:    cubic-bezier(.4,0,.2,1);
+}
+
+/* ══════════════════════════════════════
+   RESET + BASE
+══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--sans);
+  background: var(--white);
+  color: var(--g900);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input  { font-family: inherit; }
+a      { text-decoration: none; color: inherit; }
+svg    { display: block; }
+
+/* ══════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--white); }
+::-webkit-scrollbar-thumb { background: var(--g200); border-radius: 5px; }
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+.header {
+  position: sticky; top: 0; z-index: 400;
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid var(--g100);
+  height: 56px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+}
+
+/* Logo */
+.logo {
+  font-family: var(--serif);
+  font-size: 18px;
+  letter-spacing: -0.3px;
+  color: var(--g900);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); }
+
+/* Search */
+.search-wrap {
+  position: relative;
+  width: min(520px, 100%);
+}
+.search-input {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--g100);
+  border-radius: 999px;
+  padding: 0 16px 0 40px;
+  font-size: 13.5px;
+  font-weight: 300;
+  color: var(--g900);
+  background: var(--g50);
+  outline: none;
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+.search-input::placeholder { color: var(--g400); }
+.search-input:focus {
+  border-color: var(--g200);
+  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(29,78,216,.06);
+}
+.search-icon {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--g400);
+  pointer-events: none;
+}
+
+/* Nav */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--r);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--g600);
+  transition: background .15s, color .15s;
+  position: relative;
+}
+.nav-btn:hover { background: var(--g50); color: var(--g900); }
+.nav-btn.active { color: var(--g900); background: var(--g100); font-weight: 500; }
+.nav-badge {
+  position: absolute; top: 4px; right: 4px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--blue);
+  border: 1.5px solid var(--white);
+}
+.nav-btn svg { flex-shrink: 0; }
+
+/* ══════════════════════════════════════
+   FILTER BAR
+══════════════════════════════════════ */
+.filter-bar {
+  border-bottom: 1px solid var(--g100);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-pill {
+  padding: 14px 16px;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--g400);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+  cursor: pointer;
+}
+.filter-pill:hover  { color: var(--g800); }
+.filter-pill.on {
+  color: var(--g900);
+  border-bottom-color: var(--g900);
+  font-weight: 500;
+}
+.filter-sep {
+  width: 1px; height: 16px; background: var(--g100);
+  margin: 0 8px; flex-shrink: 0;
+}
+.sort-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--g600);
+  padding: 8px 12px;
+  border-radius: var(--r);
+  border: 1px solid var(--g100);
+  transition: all .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.sort-btn:hover { background: var(--g50); }
+
+/* ══════════════════════════════════════
+   LAYOUT CONTAINER
+══════════════════════════════════════ */
+.page-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: calc(100vh - 97px);
+}
+
+/* ══════════════════════════════════════
+   MASONRY GALLERY
+══════════════════════════════════════ */
+.gallery-wrap { padding: 24px; }
+.masonry {
+  columns: 5;
+  column-gap: 12px;
+}
+@media (max-width:1400px){ .masonry { columns: 4; } }
+@media (max-width:1100px){ .masonry { columns: 3; } }
+@media (max-width:780px) { .masonry { columns: 2; } }
+@media (max-width:480px) { .masonry { columns: 2; column-gap: 8px; } }
+
+/* ══════════════════════════════════════
+   CARD
+══════════════════════════════════════ */
+.card {
+  break-inside: avoid;
+  margin-bottom: 12px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  background: var(--g50);
+  border: 1px solid transparent;
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+  display: block;
+}
+.card:hover {
+  border-color: var(--g100);
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+}
+
+/* Card image — SVG art */
+.card-img {
+  width: 100%;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+.card-img svg { display: block; width: 100%; }
+
+/* Hover overlay */
+.card-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.48) 0%, rgba(0,0,0,0) 55%);
+  opacity: 0;
+  transition: opacity .2s var(--ease);
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+}
+.card:hover .card-overlay { opacity: 1; }
+
+/* Top row on overlay */
+.overlay-top {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* Bottom row on overlay */
+.overlay-bot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+.overlay-style {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .5px;
+  color: rgba(255,255,255,.85);
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 3px 10px;
+  border: 1px solid rgba(255,255,255,.15);
+}
+
+/* Icon buttons on overlay */
+.icon-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(8px);
+  border: none;
+  color: var(--g800);
+  transition: transform .15s, background .15s, color .15s;
+  flex-shrink: 0;
+}
+.icon-btn:hover { transform: scale(1.08); background: var(--white); }
+.icon-btn.wish { }
+.icon-btn.wish.on { background: var(--red-l); color: var(--red); }
+.icon-btn.proj-add:hover { background: var(--blue-l); color: var(--blue); }
+
+/* Card body */
+.card-body {
+  padding: 10px 12px 12px;
+  background: var(--white);
+}
+.card-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--g900);
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.card-style {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--g400);
+  letter-spacing: .3px;
+}
+.card-dims {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--g400);
+}
+
+/* ══════════════════════════════════════
+   PROJECT POPUP (dropdown from "Add to project" btn)
+══════════════════════════════════════ */
+.proj-popup {
+  position: absolute; z-index: 200;
+  top: 50px; right: 10px;
+  background: var(--white);
+  border: 1px solid var(--g100);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 40px rgba(0,0,0,.12);
+  min-width: 220px;
+  padding: 8px 0;
+  display: none;
+}
+.proj-popup.open { display: block; }
+.popup-header {
+  padding: 8px 14px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--g400);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--g50);
+  margin-bottom: 4px;
+}
+.popup-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 8px 14px;
+  font-size: 13px; font-weight: 400; color: var(--g800);
+  transition: background .12s;
+  cursor: pointer;
+  text-align: left;
+}
+.popup-item:hover { background: var(--g50); }
+.popup-item svg { color: var(--g400); flex-shrink: 0; }
+.popup-new {
+  border-top: 1px solid var(--g50);
+  margin-top: 4px;
+  color: var(--blue);
+  font-weight: 500;
+}
+.popup-new:hover { background: var(--blue-l); }
+.popup-new svg { color: var(--blue); }
+
+/* ══════════════════════════════════════
+   SIDE DRAWER — Project Manager
+══════════════════════════════════════ */
+.drawer-mask {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.32);
+  backdrop-filter: blur(2px);
+  transition: opacity .2s;
+}
+.drawer-mask.open { display: block; }
+
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 600;
+  width: min(400px, 100vw);
+  background: var(--white);
+  border-left: 1px solid var(--g100);
+  transform: translateX(100%);
+  transition: transform .35s var(--ease);
+  display: flex; flex-direction: column;
+}
+.drawer.open { transform: translateX(0); }
+
+.drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--g100);
+  flex-shrink: 0;
+}
+.drawer-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--g900);
+}
+.drawer-close {
+  width: 32px; height: 32px; border-radius: var(--r);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--g600); transition: background .15s;
+}
+.drawer-close:hover { background: var(--g50); }
+
+.drawer-body { flex: 1; overflow-y: auto; padding: 16px; }
+.drawer-body::-webkit-scrollbar { width: 3px; }
+.drawer-body::-webkit-scrollbar-thumb { background: var(--g100); border-radius: 3px; }
+
+/* New project button */
+.new-proj-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 12px 14px;
+  border: 1px dashed var(--g200);
+  border-radius: var(--r-lg);
+  font-size: 13.5px; font-weight: 400; color: var(--g600);
+  margin-bottom: 16px;
+  transition: all .15s;
+}
+.new-proj-btn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--blue-l);
+}
+
+/* Project folder card */
+.proj-folder {
+  border: 1px solid var(--g100);
+  border-radius: var(--r-lg);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color .15s;
+}
+.proj-folder:hover { border-color: var(--g200); }
+.proj-folder-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  background: var(--white);
+  transition: background .12s;
+}
+.proj-folder-head:hover { background: var(--g50); }
+.proj-folder-icon {
+  width: 34px; height: 34px; border-radius: var(--r);
+  background: var(--g50); border: 1px solid var(--g100);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.proj-folder-info { flex: 1; min-width: 0; }
+.proj-folder-name {
+  font-size: 13.5px; font-weight: 500; color: var(--g900);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.proj-folder-count {
+  font-size: 11.5px; color: var(--g400); margin-top: 1px;
+}
+.proj-folder-toggle { color: var(--g400); transition: transform .2s; }
+.proj-folder.expanded .proj-folder-toggle { transform: rotate(90deg); }
+
+/* Folder items grid */
+.proj-items {
+  display: none;
+  padding: 0 12px 12px;
+  background: var(--g50);
+  border-top: 1px solid var(--g100);
+}
+.proj-folder.expanded .proj-items { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; padding-top: 10px; }
+.proj-item-card {
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--g100);
+  background: var(--white);
+  position: relative;
+  cursor: pointer;
+}
+.proj-item-card svg { width: 100%; display: block; }
+.proj-item-name {
+  padding: 4px 6px;
+  font-size: 10px; color: var(--g600);
+  background: var(--white);
+  border-top: 1px solid var(--g100);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.proj-item-remove {
+  position: absolute; top: 4px; right: 4px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(255,255,255,.9); border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--g600);
+  cursor: pointer; opacity: 0;
+  transition: opacity .15s;
+}
+.proj-item-card:hover .proj-item-remove { opacity: 1; }
+
+.empty-folder {
+  grid-column: 1/-1;
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--g400);
+}
+
+/* ══════════════════════════════════════
+   WISHLIST SIDE PANEL
+══════════════════════════════════════ */
+.wish-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 600;
+  width: min(360px, 100vw);
+  background: var(--white);
+  border-left: 1px solid var(--g100);
+  transform: translateX(100%);
+  transition: transform .35s var(--ease);
+  display: flex; flex-direction: column;
+}
+.wish-drawer.open { transform: translateX(0); }
+
+.wish-list { flex: 1; overflow-y: auto; padding: 12px; }
+.wish-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px; border-radius: var(--r);
+  border: 1px solid var(--g100);
+  margin-bottom: 8px;
+  transition: border-color .15s;
+}
+.wish-item:hover { border-color: var(--g200); }
+.wish-thumb {
+  width: 48px; height: 48px; border-radius: var(--r);
+  overflow: hidden; flex-shrink: 0; background: var(--g50);
+}
+.wish-thumb svg { width: 100%; height: 100%; }
+.wish-info { flex: 1; min-width: 0; }
+.wish-name { font-size: 13px; font-weight: 500; color: var(--g900); }
+.wish-style { font-size: 11px; color: var(--g400); font-family: var(--mono); margin-top: 1px; }
+.wish-remove { color: var(--g400); transition: color .15s; }
+.wish-remove:hover { color: var(--red); }
+
+/* ══════════════════════════════════════
+   MODAL — Card Detail
+══════════════════════════════════════ */
+.modal-mask {
+  display: none; position: fixed; inset: 0; z-index: 700;
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-mask.open { display: flex; }
+.modal {
+  background: var(--white);
+  border: 1px solid var(--g100);
+  border-radius: 16px;
+  width: min(880px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+}
+@media (max-width: 680px) {
+  .modal { grid-template-columns: 1fr; }
+  .modal-img { height: 260px; }
+}
+.modal-img {
+  background: var(--g50);
+  display: flex; align-items: center; justify-content: center;
+  padding: 32px;
+  border-right: 1px solid var(--g100);
+}
+.modal-img svg { width: 100%; max-height: 320px; }
+.modal-info { padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+.modal-tag {
+  font-family: var(--mono);
+  font-size: 10.5px; letter-spacing: .8px;
+  color: var(--blue); text-transform: uppercase;
+}
+.modal-name {
+  font-family: var(--serif);
+  font-size: 28px; line-height: 1.15;
+  color: var(--g900);
+}
+.modal-dims-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+}
+.modal-dim-box {
+  border: 1px solid var(--g100); border-radius: var(--r);
+  padding: 10px; text-align: center;
+}
+.modal-dim-val {
+  font-family: var(--mono);
+  font-size: 18px; font-weight: 500; color: var(--g900);
+}
+.modal-dim-lbl { font-size: 10px; color: var(--g400); margin-top: 2px; }
+
+.modal-mats { display: flex; flex-wrap: wrap; gap: 6px; }
+.mat-chip {
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 12px; cursor: pointer;
+  border: 1px solid var(--g100); color: var(--g600);
+  transition: all .15s;
+}
+.mat-chip:hover, .mat-chip.on {
+  border-color: var(--g900); color: var(--g900);
+  background: var(--g900); color: var(--white);
+}
+.modal-sliders { display: flex; flex-direction: column; gap: 12px; }
+.m-sl-row { display: flex; flex-direction: column; gap: 5px; }
+.m-sl-top { display: flex; justify-content: space-between; align-items: baseline; }
+.m-sl-lbl { font-size: 12px; color: var(--g600); }
+.m-sl-val { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--g900); }
+input[type=range] {
+  width: 100%; height: 2px; -webkit-appearance: none; appearance: none;
+  background: var(--g100); border-radius: 2px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--g900); border: 3px solid var(--white);
+  box-shadow: 0 0 0 1px var(--g200);
+  cursor: pointer; transition: transform .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+.modal-actions { display: flex; flex-direction: column; gap: 8px; }
+.btn-full {
+  width: 100%; padding: 12px; border-radius: var(--r);
+  font-size: 13.5px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all .15s;
+}
+.btn-dark { background: var(--g900); color: var(--white); }
+.btn-dark:hover { background: var(--g800); }
+.btn-outline {
+  background: var(--white); color: var(--g900);
+  border: 1px solid var(--g100);
+}
+.btn-outline:hover { border-color: var(--g400); }
+.btn-blue { background: var(--blue); color: var(--white); }
+.btn-blue:hover { opacity: .88; }
+.modal-close-wrap {
+  position: absolute; top: 12px; right: 12px;
+}
+
+/* ══════════════════════════════════════
+   EMPTY / LOADING STATES
+══════════════════════════════════════ */
+.empty-state {
+  grid-column: 1/-1;
+  text-align: center; padding: 64px 24px;
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; opacity: .3; }
+.empty-title { font-family: var(--serif); font-size: 20px; color: var(--g400); }
+.empty-sub { font-size: 13px; color: var(--g400); margin-top: 6px; }
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  z-index: 900;
+  background: var(--g900); color: var(--white);
+  font-size: 13px; font-weight: 400;
+  padding: 10px 18px; border-radius: 999px;
+  opacity: 0; pointer-events: none;
+  transition: all .25s var(--ease);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ══════════════════════════════════════
+   SUBTLE ANIMATIONS
+══════════════════════════════════════ */
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.card { animation: fadeIn .35s var(--ease) both; }
+
+/* ══════════════════════════════════════
+   RESPONSIVE HEADER
+══════════════════════════════════════ */
+@media (max-width: 640px) {
+  .header { grid-template-columns: auto 1fr; grid-template-rows: auto auto; height: auto; padding: 10px 16px; gap: 8px; }
+  .nav { grid-column: 1/-1; justify-content: flex-start; }
+  .search-wrap { grid-column: 2/3; }
+  .gallery-wrap { padding: 12px; }
+  .filter-bar { padding: 0 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background Animated Video -->
+<video autoplay muted loop id="bg-video" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
+  <source src="backgraund.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header class="header">
+  <!-- Logo -->
+  <a href="#" class="logo">
+    <div class="logo-dot"></div>
+    Obid's App
+  </a>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input class="search-input" type="text" id="search-input"
+      placeholder="Mebel, uslub yoki o'lcham qidiring..." oninput="onSearch(this.value)">
+  </div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchView('gallery', this)">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+      Galereya
+    </button>
+    <button class="nav-btn" onclick="switchView('ai', this)">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      AI Dizayn
+    </button>
+    <button class="nav-btn" onclick="openWishlist()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+      Tanlanganlar
+      <span class="nav-badge" id="wish-badge" style="display:none;"></span>
+    </button>
+    <button class="nav-btn" onclick="openDrawer()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+      Loyihalar
+    </button>
+  </nav>
+</header>
+
+<!-- ══════════════════════════════════════
+     FILTER BAR
+══════════════════════════════════════ -->
+<div class="filter-bar" id="filter-bar">
+  <button class="filter-pill on" onclick="setFilter('all', this)">Hammasi</button>
+  <button class="filter-pill" onclick="setFilter('Modern', this)">Modern</button>
+  <button class="filter-pill" onclick="setFilter('Skandinaviya', this)">Skandinaviya</button>
+  <button class="filter-pill" onclick="setFilter('Klassik', this)">Klassik</button>
+  <button class="filter-pill" onclick="setFilter('Loft', this)">Loft</button>
+  <button class="filter-pill" onclick="setFilter('Minimalist', this)">Minimalist</button>
+  <button class="filter-pill" onclick="setFilter('Industrial', this)">Industrial</button>
+  <button class="filter-pill" onclick="setFilter('Boho', this)">Boho</button>
+  <div class="filter-sep"></div>
+  <button class="sort-btn" onclick="toggleSort()">
+    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path d="M3 6h18M7 12h10M11 18h2"/>
+    </svg>
+    <span id="sort-label">Yangi</span>
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════
+     GALLERY
+══════════════════════════════════════ -->
+<main class="page-body">
+  <div class="gallery-wrap" id="gallery-wrap">
+    <div class="masonry" id="masonry"></div>
+  </div>
+
+  <!-- AI VIEW placeholder -->
+  <div id="ai-view" style="display:none; padding:48px 24px; text-align:center;">
+    <div style="max-width:480px; margin:0 auto;">
+      <div style="font-family:var(--serif); font-size:32px; color:var(--g900); margin-bottom:12px;">
+        AI Interyer Dizayner
+      </div>
+      <div style="font-size:14px; color:var(--g400); line-height:1.7; margin-bottom:28px;">
+        Xonangizning rasmini yuklang yoki o'lchamlarni kiriting — AI sizga mos mebel taklif qiladi.
+      </div>
+      <div id="ai-upload-zone"
+        style="border:1px dashed var(--g200); border-radius:12px; padding:48px 24px; cursor:pointer; transition:all .2s; background:var(--g50);"
+        onclick="document.getElementById('ai-file').click()"
+        ondragover="event.preventDefault(); this.style.borderColor='var(--blue)'; this.style.background='var(--blue-l)';"
+        ondragleave="this.style.borderColor='var(--g200)'; this.style.background='var(--g50)';"
+        ondrop="handleAIDrop(event)">
+        <div style="font-size:32px; margin-bottom:10px; opacity:.35;">↑</div>
+        <div style="font-size:14px; color:var(--g600);">Rasm yuklash</div>
+        <div style="font-size:12px; color:var(--g400); margin-top:4px;">JPG, PNG yoki WEBP — max 10MB</div>
+      </div>
+      <input type="file" id="ai-file" accept="image/*" style="display:none;" onchange="handleAIFile(event)">
+      <img id="ai-preview" src="" alt="" style="display:none; width:100%; border-radius:12px; margin-top:16px; border:1px solid var(--g100);">
+      <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+        <textarea id="ai-prompt" placeholder="Xohishingizni yozing: uslub, rang, o'lcham..."
+          style="width:100%; padding:12px 14px; border:1px solid var(--g100); border-radius:8px; font-family:var(--sans); font-size:13.5px; resize:vertical; min-height:80px; outline:none; color:var(--g900); transition:border-color .2s;"
+          onfocus="this.style.borderColor='var(--g400)'"
+          onblur="this.style.borderColor='var(--g100)'"></textarea>
+        <button onclick="runAI()" class="btn-full btn-dark" style="border-radius:8px;">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          AI Tahlil qilish
+        </button>
+      </div>
+      <div id="ai-result" style="display:none; margin-top:16px; padding:16px; background:var(--g50); border-radius:8px; font-size:13.5px; color:var(--g600); line-height:1.7; text-align:left;"></div>
+    </div>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════
+     PROJECT DRAWER
+══════════════════════════════════════ -->
+<div class="drawer-mask" id="drawer-mask" onclick="closeDrawer()"></div>
+<aside class="drawer" id="proj-drawer">
+  <div class="drawer-head">
+    <div class="drawer-title">Loyihalar</div>
+    <button class="drawer-close" onclick="closeDrawer()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawer-body">
+    <button class="new-proj-btn" onclick="createProject()">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      Yangi loyiha yaratish
+    </button>
+    <div id="projects-list"></div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════
+     WISHLIST DRAWER
+══════════════════════════════════════ -->
+<div class="drawer-mask" id="wish-mask" onclick="closeWishlist()"></div>
+<aside class="wish-drawer" id="wish-drawer">
+  <div class="drawer-head">
+    <div class="drawer-title">Tanlanganlar</div>
+    <button class="drawer-close" onclick="closeWishlist()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+  <div class="wish-list" id="wish-list"></div>
+</aside>
+
+<!-- ══════════════════════════════════════
+     MODAL — Item Detail
+══════════════════════════════════════ -->
+<div class="modal-mask" id="modal-mask" onclick="onModalBg(event)">
+  <div class="modal" id="modal-inner" style="position:relative;">
+    <div class="modal-img" id="modal-img"></div>
+    <div class="modal-info">
+      <div>
+        <div class="modal-tag" id="modal-tag"></div>
+        <div class="modal-name" id="modal-name"></div>
+      </div>
+      <div class="modal-dims-grid" id="modal-dims"></div>
+      <div>
+        <div style="font-size:11px; color:var(--g400); letter-spacing:.5px; text-transform:uppercase; margin-bottom:8px;">Material</div>
+        <div class="modal-mats" id="modal-mats"></div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:var(--g400); letter-spacing:.5px; text-transform:uppercase; margin-bottom:10px;">O'lchamni sozlash</div>
+        <div class="modal-sliders" id="modal-sliders"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-full btn-blue" onclick="modalOrder()">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          Buyurtma berish
+        </button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button class="btn-full btn-outline" onclick="modalWish()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            Saqlash
+          </button>
+          <button class="btn-full btn-outline" onclick="modalAddToProject()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            Loyihaga
+          </button>
+        </div>
+      </div>
+    </div>
+    <button onclick="closeModal()" style="position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:var(--r); display:flex; align-items:center; justify-content:center; background:var(--white); border:1px solid var(--g100); color:var(--g600); cursor:pointer;">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// SVG FURNITURE RENDERER
+// ══════════════════════════════════════
+const PALETTE = {
+  walnut:  { fill:'#D2691E', shade:'#8B4513', light:'#F4A460' },
+  white:   { fill:'#F5F0EB', shade:'#D4CCBF', light:'#FAFAF8' },
+  gray:    { fill:'#B0B0B0', shade:'#808080', light:'#D0D0D0' },
+  navy:    { fill:'#4169E1', shade:'#000080', light:'#6495ED' },
+  sage:    { fill:'#32CD32', shade:'#228B22', light:'#90EE90' },
+  blush:   { fill:'#FF69B4', shade:'#DC143C', light:'#FFB6C1' },
+  charcoal:{ fill:'#3A3A3A', shade:'#1A1A1A', light:'#5A5A5A' },
+  cream:   { fill:'#FFFACD', shade:'#F0E68C', light:'#FFFFE0' },
+};
+
+const drawers = {
+  sofa: (p, w, h) => {
+    const f=p.fill, s=p.shade, l=p.light;
+    return `<rect x="${w*.06}" y="${h*.38}" width="${w*.88}" height="${h*.46}" rx="${w*.04}" fill="${f}"/>
+      <rect x="${w*.06}" y="${h*.18}" width="${w*.25}" height="${h*.58}" rx="${w*.04}" fill="${f}"/>
+      <rect x="${w-.06*w-.25*w}" y="${h*.18}" width="${w*.25}" height="${h*.58}" rx="${w*.04}" fill="${f}"/>
+      <rect x="${w*.1}" y="${h*.15}" width="${w*.8}" height="${h*.26}" rx="${w*.03}" fill="${s}" opacity=".4"/>
+      <rect x="${w*.1}" y="${h*.42}" width="${w*.38}" height="${h*.38}" rx="${w*.02}" fill="${l}" opacity=".55"/>
+      <rect x="${w*.52}" y="${h*.42}" width="${w*.38}" height="${h*.38}" rx="${w*.02}" fill="${l}" opacity=".55"/>
+      <rect x="${w*.12}" y="${h*.82}" width="${w*.08}" height="${h*.1}" rx="${w*.02}" fill="${s}"/>
+      <rect x="${w-.12*w-.08*w}" y="${h*.82}" width="${w*.08}" height="${h*.1}" rx="${w*.02}" fill="${s}"/>`;
+  },
+  armchair: (p, w, h) => {
+    const f=p.fill, s=p.shade, l=p.light;
+    return `<rect x="${w*.18}" y="${h*.28}" width="${w*.64}" height="${h*.5}" rx="${w*.05}" fill="${f}"/>
+      <rect x="${w*.18}" y="${h*.1}" width="${w*.64}" height="${h*.24}" rx="${w*.05}" fill="${s}" opacity=".5"/>
+      <rect x="${w*.04}" y="${h*.2}" width="${w*.16}" height="${h*.46}" rx="${w*.04}" fill="${f}"/>
+      <rect x="${w*.8}" y="${h*.2}" width="${w*.16}" height="${h*.46}" rx="${w*.04}" fill="${f}"/>
+      <rect x="${w*.24}" y="${h*.76}" width="${w*.1}" height="${h*.16}" rx="${w*.02}" fill="${s}"/>
+      <rect x="${w*.66}" y="${h*.76}" width="${w*.1}" height="${h*.16}" rx="${w*.02}" fill="${s}"/>
+      <circle cx="${w*.5}" cy="${h*.5}" r="${w*.04}" fill="${s}" opacity=".35"/>`;
+  },
+  table: (p, w, h) => {
+    const f=p.fill, s=p.shade, l=p.light;
+    return `<rect x="${w*.06}" y="${h*.22}" width="${w*.88}" height="${h*.14}" rx="${w*.02}" fill="${f}"/>
+      <rect x="${w*.06}" y="${h*.22}" width="${w*.88}" height="${h*.04}" rx="${w*.02}" fill="${l}" opacity=".6"/>
+      <rect x="${w*.14}" y="${h*.36}" width="${w*.1}" height="${h*.52}" rx="${w*.02}" fill="${s}"/>
+      <rect x="${w*.76}" y="${h*.36}" width="${w*.1}" height="${h*.52}" rx="${w*.02}" fill="${s}"/>
+      <rect x="${w*.14}" y="${h*.56}" width="${w*.72}" height="${h*.06}" rx="${w*.02}" fill="${s}" opacity=".2"/>`;
+  },
+  dining: (p, w, h) => {
+    const f=p.fill, s=p.shade;
+    return `<rect x="${w*.08}" y="${h*.2}" width="${w*.84}" height="${h*.1}" rx="${w*.02}" fill="${f}"/>
+      <rect x="${w*.14}" y="${h*.3}" width="${w*.08}" height="${h*.5}" rx="${w*.02}" fill="${s}"/>
+      <rect x="${w*.78}" y="${h*.3}" width="${w*.08}" height="${h*.5}" rx="${w*.02}" fill="${s}"/>
+      <rect x="${w*.44}" y="${h*.3}" width="${w*.12}" height="${h*.5}" rx="${w*.02}" fill="${s}" opacity=".5"/>
+      <rect x="${w*.22}" y="${h*.3}" width="${w*.56}" height="${h*.06}" rx="${w*.02}" fill="${s}" opacity=".15"/>`;
+  },
+  wardrobe: (p, w, h) => {
+    const f=p.fill, s=p.shade, l=p.light;
+    return `<rect x="${w*.08}" y="${h*.06}" width="${w*.84}" height="${h*.88}" rx="${w*.025}" fill="${f}"/>
+      <rect x="${w*.08}" y="${h*.06}" width="${w*.84}" height="${h*.06}" rx="${w*.02}" fill="${l}" opacity=".5"/>
+      <line x1="${w*.5}" y1="${h*.06}" x2="${w*.5}" y2="${h*.94}" stroke="${s}" stroke-width="${w*.012}"/>
+      <circle cx="${w*.44}" cy="${h*.52}" r="${w*.025}" fill="${s}"/>
+      <circle cx="${w*.56}" cy="${h*.52}" r="${w*.025}" fill="${s}"/>
+      <line x1="${w*.08}" y1="${h*.62}" x2="${w*.92}" y2="${h*.62}" stroke="${s}" stroke-width="${w*.008}" opacity=".25"/>`;
+  },
+  bed: (p, w, h) => {
+    const f=p.fill, s=p.shade, l=p.light;
+    return `<rect x="${w*.04}" y="${h*.35}" width="${w*.92}" height="${h*.5}" rx="${w*.025}" fill="${f}"/>
+      <rect x="${w*.04}" y="${h*.18}" width="${w*.18}" height="${h*.68}" rx="${w*.03}" fill="${s}" opacity=".7"/>
+      <rect x="${w*.78}" y="${h*.18}" width="${w*.18}" height="${h*.68}" rx="${w*.03}" fill="${s}" opacity=".7"/>
+      <rect x="${w*.1}" y="${h*.35}" width="${w*.35}" height="${h*.32}" rx="${w*.02}" fill="${l}" opacity=".5"/>
+      <rect x="${w*.55}" y="${h*.35}" width="${w*.35}" height="${h*.32}" rx="${w*.02}" fill="${l}" opacity=".5"/>`;
+  },
+  shelf: (p, w, h) => {
+    const f=p.fill, s=p.shade;
+    const rows = 4;
+    let out = `<rect x="${w*.06}" y="${h*.04}" width="${w*.88}" height="${h*.92}" rx="${w*.02}" fill="${f}" opacity=".12"/>
+      <rect x="${w*.06}" y="${h*.04}" width="${w*.04}" height="${h*.92}" rx="${w*.01}" fill="${f}"/>
+      <rect x="${w*.9}" y="${h*.04}" width="${w*.04}" height="${h*.92}" rx="${w*.01}" fill="${f}"/>`;
+    for(let i=0;i<=rows;i++){
+      const y = h*.04 + (h*.92/rows)*i;
+      out += `<rect x="${w*.06}" y="${y}" width="${w*.88}" height="${h*.03}" rx="${w*.01}" fill="${f}"/>`;
+    }
+    // decorative books
+    const bc=['#E74C3C','#3498DB','#27AE60','#F39C12','#9B59B6','#E67E22'];
+    for(let r=0;r<rows-1;r++){
+      const by = h*.04 + (h*.92/rows)*r + h*.04;
+      const bh = h*.92/rows - h*.06;
+      let bx = w*.1;
+      for(let b=0;b<Math.floor(3+Math.random()*3);b++){
+        const bw = w*.06 + Math.random()*w*.06;
+        if(bx+bw > w*.9) break;
+        out += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="${w*.01}" fill="${bc[b%bc.length]}"/>`;
+        bx += bw + w*.01;
+      }
+    }
+    return out;
+  },
+  coffeetable: (p, w, h) => {
+    const f=p.fill, s=p.shade, l=p.light;
+    return `<rect x="${w*.06}" y="${h*.35}" width="${w*.88}" height="${h*.12}" rx="${w*.025}" fill="${f}"/>
+      <rect x="${w*.06}" y="${h*.35}" width="${w*.88}" height="${h*.04}" rx="${w*.02}" fill="${l}" opacity=".5"/>
+      <rect x="${w*.16}" y="${h*.47}" width="${w*.08}" height="${h*.36}" rx="${w*.02}" fill="${s}"/>
+      <rect x="${w*.76}" y="${h*.47}" width="${w*.08}" height="${h*.36}" rx="${w*.02}" fill="${s}"/>
+      <rect x="${w*.16}" y="${h*.62}" width="${w*.68}" height="${h*.04}" rx="${w*.02}" fill="${f}" opacity=".4"/>`;
+  },
+  desk: (p, w, h) => {
+    const f=p.fill, s=p.shade, l=p.light;
+    return `<rect x="${w*.04}" y="${h*.24}" width="${w*.92}" height="${h*.1}" rx="${w*.02}" fill="${f}"/>
+      <rect x="${w*.04}" y="${h*.24}" width="${w*.92}" height="${h*.03}" rx="${w*.02}" fill="${l}" opacity=".5"/>
+      <rect x="${w*.06}" y="${h*.34}" width="${w*.12}" height="${h*.54}" rx="${w*.02}" fill="${s}"/>
+      <rect x="${w*.82}" y="${h*.34}" width="${w*.12}" height="${h*.54}" rx="${w*.02}" fill="${s}"/>
+      <rect x="${w*.22}" y="${h*.34}" width="${w*.32}" height="${h*.3}" rx="${w*.02}" fill="${s}" opacity=".25"/>`;
+  },
+};
+
+function makeSVG(type, pal, width, height) {
+  const p = PALETTE[pal] || PALETTE.walnut;
+  const inner = drawers[type] ? drawers[type](p, width, height) : drawers.sofa(p, width, height);
+  return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+    <rect width="${width}" height="${height}" fill="${p.fill}" opacity=".06"/>
+    ${inner}
+  </svg>`;
+}
+
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+const STYLES = ['Modern','Skandinaviya','Klassik','Loft','Minimalist','Industrial','Boho'];
+const TYPES  = ['sofa','armchair','table','dining','wardrobe','bed','shelf','coffeetable','desk'];
+const PALS   = Object.keys(PALETTE);
+const TYPE_NAMES = {
+  sofa:'Divan', armchair:'Kreslo', table:'Stol', dining:'Oshxona stoli',
+  wardrobe:'Shkaf', bed:'Karavot', shelf:'Javon', coffeetable:'Kofe stoli', desk:'Ish stoli'
+};
+const TYPE_DIMS = {
+  sofa:{w:[160,280],d:[80,120],h:[70,95]},
+  armchair:{w:[65,100],d:[70,100],h:[80,105]},
+  table:{w:[80,160],d:[60,100],h:[70,80]},
+  dining:{w:[120,200],d:[80,100],h:[72,80]},
+  wardrobe:{w:[80,240],d:[45,70],h:[180,240]},
+  bed:{w:[120,200],d:[190,220],h:[40,60]},
+  shelf:{w:[60,200],d:[25,45],h:[100,220]},
+  coffeetable:{w:[60,130],d:[50,90],h:[38,50]},
+  desk:{w:[100,180],d:[55,80],h:[72,80]},
+};
+const MATS_BY_TYPE = {
+  sofa:["Mato","Charm","Velur","Ekokozha","Linen"],
+  armchair:["Mato","Charm","Velur","Rattan"],
+  table:["Yog'och","Metal","Shisha","MDF"],
+  dining:["Yog'och","Metal","Shisha+Metal"],
+  wardrobe:["Yog'och","MDF","LDSP","Bambu"],
+  bed:["Yog'och","Metal","Ekokozha"],
+  shelf:["Yog'och","Metal","MDF"],
+  coffeetable:["Yog'och","Metal","Shisha","Mramor"],
+  desk:["Yog'och","Metal","MDF"],
+};
+
+function rand(a, b) { return Math.floor(Math.random()*(b-a+1))+a; }
+function randItem(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+
+function generateItems(count=60) {
+  const items = [];
+  // Heights for masonry variety
+  const svgHeights = [120,140,160,180,200,220,240,260];
+  for(let i=0;i<count;i++){
+    const type = TYPES[i % TYPES.length];
+    const dims = TYPE_DIMS[type];
+    const sh = randItem(svgHeights);
+    items.push({
+      id: i+1,
+      name: TYPE_NAMES[type],
+      type,
+      style: STYLES[i % STYLES.length],
+      pal: PALS[i % PALS.length],
+      svgW: 280, svgH: sh,
+      w: rand(...dims.w), d: rand(...dims.d), h: rand(...dims.h),
+      mats: MATS_BY_TYPE[type] || ["Yog'och","Metal"],
+    });
+  }
+  return items;
+}
+
+let ALL_ITEMS = generateItems(56);
+let filteredItems = [...ALL_ITEMS];
+let wishlist = new Set();
+let projects = [
+  { id:1, name:'Mehmonxona', emoji:'🛋', items:[] },
+  { id:2, name:'Yotoqxona', emoji:'🛏', items:[] },
+];
+let currentItem = null;
+let activeFilter = 'all';
+let searchQ = '';
+let sortMode = 'new';
+let activePopup = null;
+
+// ══════════════════════════════════════
+// RENDER GALLERY
+// ══════════════════════════════════════
+function renderGallery() {
+  const masonry = document.getElementById('masonry');
+  if (!filteredItems.length) {
+    masonry.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      <div class="empty-icon">📦</div>
+      <div class="empty-title">Hech narsa topilmadi</div>
+      <div class="empty-sub">Filtrni o'zgartiring yoki boshqa kalit so'z kiriting</div>
+    </div>`;
+    return;
+  }
+  masonry.innerHTML = filteredItems.map((item, idx) => `
+    <div class="card" onclick="openModal(${item.id})" style="animation-delay:${Math.min(idx,12)*0.04}s;">
+      <div class="card-img">
+        ${makeSVG(item.type, item.pal, item.svgW, item.svgH)}
+        <div class="card-overlay" onclick="event.stopPropagation()">
+          <div class="overlay-top">
+            <button class="icon-btn wish${wishlist.has(item.id)?' on':''}"
+              onclick="event.stopPropagation();toggleWish(${item.id},this)"
+              title="Saqla">
+              ${wishlist.has(item.id)
+                ? `<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`
+                : `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`
+              }
+            </button>
+            <button class="icon-btn proj-add"
+              onclick="event.stopPropagation();toggleProjectPopup(${item.id},this)"
+              title="Loyihaga qo'shish">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                <path d="M12 11v6M9 14h6"/>
+              </svg>
+            </button>
+          </div>
+          <div class="overlay-bot">
+            <span class="overlay-style">${item.style}</span>
+          </div>
+          <!-- Project popup -->
+          <div class="proj-popup" id="popup-${item.id}">
+            <div class="popup-header">Loyiha tanlang</div>
+            ${projects.map(p => `
+              <button class="popup-item" onclick="addToProject(${item.id},${p.id});event.stopPropagation()">
+                <span>${p.emoji}</span>${p.name}
+              </button>`).join('')}
+            <button class="popup-item popup-new" onclick="quickCreateProject(${item.id});event.stopPropagation()">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Yangi loyiha
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${item.name}</div>
+        <div class="card-meta">
+          <span class="card-style">${item.style}</span>
+          <span class="card-dims">${item.w}×${item.d}×${item.h}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// WISHLIST
+// ══════════════════════════════════════
+function toggleWish(id, btn) {
+  if (wishlist.has(id)) {
+    wishlist.delete(id);
+    btn.classList.remove('on');
+    btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+    showToast('Tanlanganlardan olib tashlandi');
+  } else {
+    wishlist.add(id);
+    btn.classList.add('on');
+    btn.innerHTML = `<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+    showToast('Tanlanganlarga saqlandi');
+  }
+  updateWishBadge();
+}
+
+function updateWishBadge() {
+  const badge = document.getElementById('wish-badge');
+  badge.style.display = wishlist.size ? 'block' : 'none';
+}
+
+function openWishlist() {
+  const list = document.getElementById('wish-list');
+  const items = ALL_ITEMS.filter(i => wishlist.has(i.id));
+  if (!items.length) {
+    list.innerHTML = `<div style="padding:32px 16px; text-align:center;">
+      <div style="font-size:32px; opacity:.25; margin-bottom:8px;">♡</div>
+      <div style="font-size:13px; color:var(--g400);">Hali hech narsa saqlanmagan</div>
+    </div>`;
+  } else {
+    list.innerHTML = items.map(item => `
+      <div class="wish-item">
+        <div class="wish-thumb">${makeSVG(item.type,item.pal,48,48)}</div>
+        <div class="wish-info">
+          <div class="wish-name">${item.name}</div>
+          <div class="wish-style">${item.style} · ${item.w}×${item.d}×${item.h}</div>
+        </div>
+        <button class="wish-remove" onclick="removeWish(${item.id})" title="Olib tashlash">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>`).join('');
+  }
+  document.getElementById('wish-mask').classList.add('open');
+  document.getElementById('wish-drawer').classList.add('open');
+}
+function closeWishlist() {
+  document.getElementById('wish-mask').classList.remove('open');
+  document.getElementById('wish-drawer').classList.remove('open');
+}
+function removeWish(id) {
+  wishlist.delete(id);
+  updateWishBadge();
+  openWishlist();
+  renderGallery();
+}
+
+// ══════════════════════════════════════
+// PROJECT POPUP
+// ══════════════════════════════════════
+function toggleProjectPopup(id, btn) {
+  const popup = document.getElementById('popup-'+id);
+  if (activePopup && activePopup !== popup) {
+    activePopup.classList.remove('open');
+  }
+  popup.classList.toggle('open');
+  activePopup = popup.classList.contains('open') ? popup : null;
+}
+document.addEventListener('click', () => {
+  if (activePopup) { activePopup.classList.remove('open'); activePopup = null; }
+});
+
+function addToProject(itemId, projId) {
+  const proj = projects.find(p => p.id === projId);
+  const item = ALL_ITEMS.find(i => i.id === itemId);
+  if (!proj || !item) return;
+  if (!proj.items.find(i => i.id === itemId)) {
+    proj.items.push(item);
+    showToast(`"${item.name}" → ${proj.name} loyihasiga qo'shildi`);
+  } else {
+    showToast(`Allaqachon ${proj.name} loyihasida`);
+  }
+  if (activePopup) { activePopup.classList.remove('open'); activePopup = null; }
+  renderProjectsDrawer();
+}
+
+function quickCreateProject(itemId) {
+  const name = prompt('Yangi loyiha nomi:');
+  if (!name) return;
+  const emojis = ['🏠','🛋','🛏','🪑','📚','🖥','🌿'];
+  const newProj = { id: Date.now(), name, emoji: emojis[Math.floor(Math.random()*emojis.length)], items: [] };
+  projects.push(newProj);
+  addToProject(itemId, newProj.id);
+  renderGallery();
+}
+
+// ══════════════════════════════════════
+// PROJECT DRAWER
+// ══════════════════════════════════════
+function openDrawer() {
+  renderProjectsDrawer();
+  document.getElementById('drawer-mask').classList.add('open');
+  document.getElementById('proj-drawer').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer-mask').classList.remove('open');
+  document.getElementById('proj-drawer').classList.remove('open');
+}
+
+function renderProjectsDrawer() {
+  const list = document.getElementById('projects-list');
+  if (!projects.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📁</div>
+      <div class="empty-title">Loyiha yo'q</div></div>`;
+    return;
+  }
+  list.innerHTML = projects.map(p => `
+    <div class="proj-folder" id="folder-${p.id}">
+      <div class="proj-folder-head" onclick="toggleFolder(${p.id})">
+        <div class="proj-folder-icon">${p.emoji}</div>
+        <div class="proj-folder-info">
+          <div class="proj-folder-name">${p.name}</div>
+          <div class="proj-folder-count">${p.items.length} ta mebel</div>
+        </div>
+        <svg class="proj-folder-toggle" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+      </div>
+      <div class="proj-items">
+        ${p.items.length ? p.items.map(item => `
+          <div class="proj-item-card">
+            ${makeSVG(item.type, item.pal, 80, 60)}
+            <div class="proj-item-name">${item.name}</div>
+            <button class="proj-item-remove" onclick="removeProjItem(${p.id},${item.id})" title="O'chirish">✕</button>
+          </div>`).join('')
+          : '<div class="empty-folder">Mebel qo\'shing</div>'}
+      </div>
+    </div>`).join('');
+}
+
+function toggleFolder(id) {
+  document.getElementById('folder-'+id).classList.toggle('expanded');
+}
+
+function createProject() {
+  const name = prompt('Loyiha nomi:');
+  if (!name) return;
+  const emojis = ['🏠','🛋','🛏','🪑','📚','🖥','🌿','🔆','🪟'];
+  projects.push({
+    id: Date.now(), name,
+    emoji: emojis[Math.floor(Math.random()*emojis.length)],
+    items: []
+  });
+  renderProjectsDrawer();
+  renderGallery();
+  showToast(`"${name}" loyihasi yaratildi`);
+}
+
+function removeProjItem(projId, itemId) {
+  const proj = projects.find(p => p.id === projId);
+  if (proj) proj.items = proj.items.filter(i => i.id !== itemId);
+  renderProjectsDrawer();
+  showToast('Loyihadan olib tashlandi');
+}
+
+// ══════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════
+function openModal(id) {
+  currentItem = ALL_ITEMS.find(i => i.id === id);
+  if (!currentItem) return;
+  const it = currentItem;
+
+  document.getElementById('modal-img').innerHTML = makeSVG(it.type, it.pal, 400, 300);
+  document.getElementById('modal-tag').textContent = it.style + ' · ' + it.type.toUpperCase();
+  document.getElementById('modal-name').textContent = it.name;
+  document.getElementById('modal-dims').innerHTML = [
+    ['Uzunlik', it.w, 'sm'],
+    ['Eni', it.d, 'sm'],
+    ['Balandlik', it.h, 'sm'],
+  ].map(([l,v,u]) => `<div class="modal-dim-box">
+    <div class="modal-dim-val">${v}</div>
+    <div class="modal-dim-lbl">${l}, ${u}</div>
+  </div>`).join('');
+
+  document.getElementById('modal-mats').innerHTML = it.mats.map((m,i) =>
+    `<button class="mat-chip${i===0?' on':''}" onclick="selMat(this)">${m}</button>`).join('');
+
+  const dims = TYPE_DIMS[it.type];
+  document.getElementById('modal-sliders').innerHTML = [
+    ['w','Uzunlik',dims.w[0],dims.w[1],it.w],
+    ['d','Eni',dims.d[0],dims.d[1],it.d],
+    ['h','Balandlik',dims.h[0],dims.h[1],it.h],
+  ].map(([k,lbl,mn,mx,v]) => `
+    <div class="m-sl-row">
+      <div class="m-sl-top">
+        <span class="m-sl-lbl">${lbl}</span>
+        <span class="m-sl-val" id="sv-${k}">${v} sm</span>
+      </div>
+      <input type="range" min="${mn}" max="${mx}" value="${v}" oninput="document.getElementById('sv-${k}').textContent=this.value+' sm'">
+    </div>`).join('');
+
+  document.getElementById('modal-mask').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-mask').classList.remove('open');
+  document.body.style.overflow = '';
+  currentItem = null;
+}
+function onModalBg(e) {
+  if (e.target === document.getElementById('modal-mask')) closeModal();
+}
+function selMat(el) {
+  document.querySelectorAll('.mat-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
+function modalOrder() {
+  if (!currentItem) return;
+  closeModal();
+  showToast(`✓ ${currentItem.name} buyurtma ro'yxatiga qo'shildi`);
+}
+function modalWish() {
+  if (!currentItem) return;
+  if (!wishlist.has(currentItem.id)) {
+    wishlist.add(currentItem.id);
+    updateWishBadge();
+    showToast('Tanlanganlarga saqlandi');
+    renderGallery();
+  } else {
+    showToast('Allaqachon saqlangan');
+  }
+}
+function modalAddToProject() {
+  if (!currentItem || !projects.length) {
+    const name = prompt('Loyiha nomi:');
+    if (!name) return;
+    projects.push({ id: Date.now(), name, emoji:'📁', items: [] });
+    renderGallery();
+  }
+  addToProject(currentItem.id, projects[0].id);
+  closeModal();
+}
+
+// ══════════════════════════════════════
+// FILTER + SEARCH
+// ══════════════════════════════════════
+function applyFilters() {
+  filteredItems = ALL_ITEMS.filter(item => {
+    const matchCat = activeFilter === 'all' || item.style === activeFilter;
+    const matchQ = !searchQ || item.name.toLowerCase().includes(searchQ) ||
+                   item.style.toLowerCase().includes(searchQ) ||
+                   item.type.toLowerCase().includes(searchQ);
+    return matchCat && matchQ;
+  });
+  if (sortMode === 'az') filteredItems.sort((a,b) => a.name.localeCompare(b.name));
+  else if (sortMode === 'za') filteredItems.sort((a,b) => b.name.localeCompare(a.name));
+  renderGallery();
+}
+
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  applyFilters();
+}
+function onSearch(q) {
+  searchQ = q.toLowerCase().trim();
+  applyFilters();
+}
+
+let sortCycle = ['new','az','za'];
+let sortIdx = 0;
+const sortLabels = { new:'Yangi', az:'A→Z', za:'Z→A' };
+function toggleSort() {
+  sortIdx = (sortIdx+1) % sortCycle.length;
+  sortMode = sortCycle[sortIdx];
+  document.getElementById('sort-label').textContent = sortLabels[sortMode];
+  applyFilters();
+}
+
+// ══════════════════════════════════════
+// VIEW SWITCHING
+// ══════════════════════════════════════
+function switchView(v, btn) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('gallery-wrap').style.display = v === 'gallery' ? '' : 'none';
+  document.getElementById('ai-view').style.display = v === 'ai' ? '' : 'none';
+  document.getElementById('filter-bar').style.display = v === 'gallery' ? '' : 'none';
+}
+
+// ══════════════════════════════════════
+// AI VIEW
+// ══════════════════════════════════════
+function handleAIDrop(e) {
+  e.preventDefault();
+  const zone = document.getElementById('ai-upload-zone');
+  zone.style.borderColor = 'var(--g200)';
+  zone.style.background = 'var(--g50)';
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) showAIPreview(file);
+}
+function handleAIFile(e) {
+  const file = e.target.files[0];
+  if (file) showAIPreview(file);
+}
+function showAIPreview(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = document.getElementById('ai-preview');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+async function runAI() {
+  const prompt = document.getElementById('ai-prompt').value.trim();
+  if (!prompt) { showToast('Iltimos, xohishingizni yozing'); return; }
+  const result = document.getElementById('ai-result');
+  result.style.display = 'block';
+  result.innerHTML = '<div style="display:flex;gap:8px;align-items:center;"><span style="color:var(--g400);">AI tahlil qilmoqda...</span><span style="animation:blink 1s infinite;">▋</span></div>';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 600,
+        system: "Siz mebel va interyer dizayn ekspertisiz. Qisqa, aniq tavsiyalar bering. Har doim o'zbekcha javob bering.",
+        messages: [{ role: 'user', content: `Foydalanuvchi xohishi: "${prompt}"\n\n3-5 ta mebel tavsiyasi bering (har biri: nomi, o'lcham, material, narx taxmini).` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(c => c.type === 'text')?.text || 'Natija yuklanmadi';
+    result.innerHTML = `<div style="white-space:pre-wrap;line-height:1.7;">${text}</div>`;
+  } catch(err) {
+    result.innerHTML = `<div style="color:var(--red);">API ulanish xatosi. Sahifani qayta yuklang.</div>`;
+  }
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+renderGallery();
+</script>
+</body>
+</html>
