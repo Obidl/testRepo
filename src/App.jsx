@@ -15,7 +15,6 @@ import {
   Search,
   Star,
   Clock,
-  Info,
   Home,
   Menu as MenuIcon,
   X,
@@ -41,7 +40,7 @@ const CATEGORIES = ['Barchasi', 'Fast-fud', 'Ichimliklar', 'Shirinliklar'];
 
 export default function App() {
   const [menu, setMenu] = useState(() => {
-    const saved = localStorage.getItem('qr_menu_panda_v5');
+    const saved = localStorage.getItem('qr_menu_panda_v6');
     return saved ? JSON.parse(saved) : DEFAULT_MENU;
   });
   
@@ -57,11 +56,12 @@ export default function App() {
   
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setTable(params.get('table') || 'Noma\'lum');
+    const tableNum = params.get('table');
+    setTable(tableNum || 'Noma\'lum');
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('qr_menu_panda_v5', JSON.stringify(menu));
+    localStorage.setItem('qr_menu_panda_v6', JSON.stringify(menu));
   }, [menu]);
 
   useEffect(() => {
@@ -142,7 +142,7 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
       setCart([]);
       setView('success');
     } catch (err) {
-      alert(`Xatolik: ${err.message}. Botga /start bosganingizni tekshiring!`);
+      alert(`Xatolik: ${err.message}. Iltimos, botga /start bosganingizni tekshiring!`);
     } finally {
       setIsSending(false);
     }
@@ -151,7 +151,37 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
   const currentUrl = window.location.origin + window.location.pathname;
   const qrValue = `${currentUrl}?table=${qrTable}`;
 
-  // --- VIEWS ---
+  const FoodCard = ({ product }) => (
+    <motion.div 
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={() => setSelectedItem(product)}
+      className="bg-white rounded-[24px] p-2 flex flex-col items-center text-center custom-shadow border border-white relative group"
+    >
+      <div className="w-full aspect-square rounded-[20px] overflow-hidden mb-2 relative">
+        <img 
+          src={product.image} 
+          alt={product.name}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            addToCart(product);
+          }}
+          className="absolute bottom-1 right-1 bg-amber-400 text-amber-950 p-2 rounded-lg shadow-lg active:bg-amber-500"
+        >
+          <Plus size={14} strokeWidth={4} />
+        </button>
+      </div>
+      <h3 className="font-bold text-slate-800 text-[10px] leading-tight line-clamp-2 px-1">{product.name}</h3>
+      <p className="text-[10px] font-black text-amber-600 mt-1">{product.price.toLocaleString()}</p>
+    </motion.div>
+  );
 
   if (view === 'success') {
     return (
@@ -170,7 +200,6 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-white font-sans pb-32">
-      {/* Header */}
       <header className="px-6 py-6 flex items-center justify-between sticky top-0 z-30 glass shadow-sm">
         <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} onClick={() => setView('home')} className="flex items-center gap-3 cursor-pointer">
           <div className="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center shadow-lg text-amber-950 text-xl">🐼</div>
@@ -242,43 +271,25 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
               <h2 className="text-2xl font-black text-slate-900 uppercase">Admin</h2>
               <button onClick={() => setView('home')} className="text-slate-400"><X /></button>
             </div>
-            
-            {/* QR Section */}
             <div className="bg-amber-50 p-6 rounded-[32px] border border-amber-100 space-y-4">
-              <h3 className="font-black text-sm uppercase flex items-center gap-2">
-                <QrCode size={18} /> QR Kod Generatsiya
-              </h3>
+              <h3 className="font-black text-sm uppercase flex items-center gap-2"><QrCode size={18} /> QR Kod</h3>
               <div className="flex gap-2">
-                <input 
-                  type="number" 
-                  value={qrTable} 
-                  onChange={(e) => setQrTable(e.target.value)}
-                  className="flex-1 p-4 bg-white rounded-2xl outline-none font-bold"
-                  placeholder="Stol raqami"
-                />
+                <input type="number" value={qrTable} onChange={(e) => setQrTable(e.target.value)} className="flex-1 p-4 bg-white rounded-2xl outline-none font-bold" placeholder="Stol" />
               </div>
               <div className="bg-white p-4 rounded-3xl flex flex-col items-center gap-4">
                 <QRCodeSVG value={qrValue} size={150} />
                 <p className="text-[10px] font-bold text-slate-400 text-center break-all">{qrValue}</p>
-                <button className="flex items-center gap-2 text-xs font-black text-amber-600 uppercase">
-                  <Download size={14} /> Yuklab olish (Print)
-                </button>
               </div>
             </div>
-
-            <div className="bg-white p-6 rounded-[32px] custom-shadow text-center">
-              <p className="text-slate-400 italic mb-4 text-sm">Menyu tahrirlash qismi faol.</p>
+            <div className="bg-white p-6 rounded-[32px] custom-shadow">
               <div className="space-y-3">
                 {menu.map(item => (
-                  <div key={item.id} className="flex items-center justify-between p-2 border-b border-slate-50 text-left">
+                  <div key={item.id} className="flex items-center justify-between p-2 border-b border-slate-50">
                     <span className="text-xs font-bold">{item.name}</span>
                     <button onClick={() => setMenu(menu.filter(m => m.id !== item.id))} className="text-red-400"><Trash2 size={16}/></button>
                   </div>
                 ))}
               </div>
-              <button onClick={() => setView('home')} className="w-full mt-6 bg-slate-900 text-white py-4 rounded-2xl font-bold">
-                ASOSIYGA QAYTISH
-              </button>
             </div>
           </div>
         ) : view === 'cart' ? (
@@ -312,13 +323,7 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
                     <span className="text-slate-400 font-bold uppercase text-[10px]">Jami summa</span>
                     <span className="text-xl font-black text-slate-900">{cartTotal.toLocaleString()} so'm</span>
                   </div>
-                  <button 
-                    type="submit" 
-                    disabled={isSending}
-                    className={`w-full py-5 rounded-[24px] font-black shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 ${
-                      isSending ? 'bg-slate-200 text-slate-400' : 'bg-amber-400 text-amber-950 hover:bg-amber-500'
-                    }`}
-                  >
+                  <button type="submit" disabled={isSending} className={`w-full py-5 rounded-[24px] font-black shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 ${isSending ? 'bg-slate-200 text-slate-400' : 'bg-amber-400 text-amber-950'}`}>
                     {isSending ? <div className="w-5 h-5 border-2 border-slate-400 border-t-amber-600 rounded-full animate-spin" /> : 'BUYURTMANI YUBORISH'}
                   </button>
                 </form>
@@ -345,7 +350,6 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
         )}
       </main>
 
-      {/* Detail Modal */}
       <AnimatePresence>
         {selectedItem && (
           <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-4">
