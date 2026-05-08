@@ -132,12 +132,16 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
         })
       });
       
-      if (!response.ok) throw new Error('Telegram API error');
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.description || 'Noma\'lum xatolik');
+      }
 
       setCart([]);
       setView('success');
     } catch (err) {
-      alert('Buyurtma yuborishda xatolik yuz berdi. Bot token va Chat ID sozlamalarini tekshiring.');
+      alert(`Telegram xatosi: ${err.message}\n\nIltimos, botga /start bosganingizni va sozlamalar to'g'riligini tekshiring.`);
     } finally {
       setIsSending(false);
     }
