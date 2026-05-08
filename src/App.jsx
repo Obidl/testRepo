@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 // --- CONFIGURATION ---
-const TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE';
+const TELEGRAM_BOT_TOKEN = '8515752068:AAHyVw2C7KhjiQGeLMQAPQrLBeCiq0J61p8';
 const TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID_HERE';
 const ADMIN_PASSWORD = 'admin';
 
