@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
 import { 
   ShoppingBag, 
   Plus, 
@@ -17,7 +18,9 @@ import {
   Info,
   Home,
   Menu as MenuIcon,
-  X
+  X,
+  QrCode,
+  Download
 } from 'lucide-react';
 
 // --- CONFIGURATION ---
@@ -38,7 +41,7 @@ const CATEGORIES = ['Barchasi', 'Fast-fud', 'Ichimliklar', 'Shirinliklar'];
 
 export default function App() {
   const [menu, setMenu] = useState(() => {
-    const saved = localStorage.getItem('qr_menu_panda_v4');
+    const saved = localStorage.getItem('qr_menu_panda_v5');
     return saved ? JSON.parse(saved) : DEFAULT_MENU;
   });
   
@@ -48,7 +51,9 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const [table, setTable] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => sessionStorage.getItem('panda_admin') === 'true');
+  const [isSending, setIsSending] = useState(false);
+  const [qrTable, setQrTable] = useState('1');
   
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -56,8 +61,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('qr_menu_panda_v4', JSON.stringify(menu));
+    localStorage.setItem('qr_menu_panda_v5', JSON.stringify(menu));
   }, [menu]);
+
+  useEffect(() => {
+    sessionStorage.setItem('panda_admin', isAdmin);
+  }, [isAdmin]);
 
   const addToCart = (product) => {
     setCart(prev => {
@@ -84,18 +93,12 @@ export default function App() {
 
   const filteredMenu = useMemo(() => {
     let result = menu;
-    if (category !== 'Barchasi') {
-      result = result.filter(item => item.category === category);
-    }
-    if (searchQuery) {
-      result = result.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    }
+    if (category !== 'Barchasi') result = result.filter(item => item.category === category);
+    if (searchQuery) result = result.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
     return result;
   }, [menu, category, searchQuery]);
 
-  const popularItems = useMemo(() => {
-    return menu.filter(item => item.popular).slice(0, 3);
-  }, [menu]);
+  const popularItems = useMemo(() => menu.filter(item => item.popular).slice(0, 3), [menu]);
 
   const sendOrder = async (e) => {
     e.preventDefault();
@@ -122,7 +125,8 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
     `;
 
     try {
-      const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -133,51 +137,21 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
       });
       
       const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.description || 'Noma\'lum xatolik');
-      }
+      if (!response.ok) throw new Error(result.description || 'Xatolik');
 
       setCart([]);
       setView('success');
     } catch (err) {
-      alert(`Telegram xatosi: ${err.message}\n\nIltimos, botga /start bosganingizni va sozlamalar to'g'riligini tekshiring.`);
+      alert(`Xatolik: ${err.message}. Botga /start bosganingizni tekshiring!`);
     } finally {
       setIsSending(false);
     }
   };
 
-  const FoodCard = ({ product }) => (
-    <motion.div 
-      layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={() => setSelectedItem(product)}
-      className="bg-white rounded-[24px] p-2 flex flex-col items-center text-center custom-shadow border border-white relative group"
-    >
-      <div className="w-full aspect-square rounded-[20px] overflow-hidden mb-2 relative">
-        <img 
-          src={product.image} 
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-        <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            addToCart(product);
-          }}
-          className="absolute bottom-1 right-1 bg-amber-400 text-amber-950 p-2 rounded-lg shadow-lg active:bg-amber-500"
-        >
-          <Plus size={14} strokeWidth={4} />
-        </button>
-      </div>
-      <h3 className="font-bold text-slate-800 text-[10px] leading-tight line-clamp-2 px-1">{product.name}</h3>
-      <p className="text-[10px] font-black text-amber-600 mt-1">{product.price.toLocaleString()}</p>
-    </motion.div>
-  );
+  const currentUrl = window.location.origin + window.location.pathname;
+  const qrValue = `${currentUrl}?table=${qrTable}`;
+
+  // --- VIEWS ---
 
   if (view === 'success') {
     return (
@@ -196,6 +170,7 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-white font-sans pb-32">
+      {/* Header */}
       <header className="px-6 py-6 flex items-center justify-between sticky top-0 z-30 glass shadow-sm">
         <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} onClick={() => setView('home')} className="flex items-center gap-3 cursor-pointer">
           <div className="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center shadow-lg text-amber-950 text-xl">🐼</div>
@@ -229,7 +204,7 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
               <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter uppercase leading-none">
                 Eng Mazali <br/> <span className="text-amber-500">Burgerlar</span>
               </h2>
-              <p className="text-slate-500 mb-8 leading-relaxed font-medium text-sm">Panda Burger - sifatli go'sht va yangi mahsulotlardan tayyorlangan sevimli burgerlaringiz maskani!</p>
+              <p className="text-slate-500 mb-8 leading-relaxed font-medium text-sm px-6">Xush kelibsiz! Panda Burger - sifatli go'sht va yangi mahsulotlardan tayyorlangan sevimli burgerlaringiz!</p>
               <button onClick={() => setView('menu')} className="bg-slate-900 text-white py-5 px-10 rounded-[28px] font-black shadow-2xl flex items-center justify-center gap-3 active:scale-95 transition-all mx-auto">
                 MENYUNI KO'RISH <ChevronRight size={20} />
               </button>
@@ -263,15 +238,52 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
           </motion.div>
         ) : view === 'admin' ? (
           <div className="p-4 space-y-6">
-            <h2 className="text-2xl font-black text-slate-900">Admin Panel</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-black text-slate-900 uppercase">Admin</h2>
+              <button onClick={() => setView('home')} className="text-slate-400"><X /></button>
+            </div>
+            
+            {/* QR Section */}
+            <div className="bg-amber-50 p-6 rounded-[32px] border border-amber-100 space-y-4">
+              <h3 className="font-black text-sm uppercase flex items-center gap-2">
+                <QrCode size={18} /> QR Kod Generatsiya
+              </h3>
+              <div className="flex gap-2">
+                <input 
+                  type="number" 
+                  value={qrTable} 
+                  onChange={(e) => setQrTable(e.target.value)}
+                  className="flex-1 p-4 bg-white rounded-2xl outline-none font-bold"
+                  placeholder="Stol raqami"
+                />
+              </div>
+              <div className="bg-white p-4 rounded-3xl flex flex-col items-center gap-4">
+                <QRCodeSVG value={qrValue} size={150} />
+                <p className="text-[10px] font-bold text-slate-400 text-center break-all">{qrValue}</p>
+                <button className="flex items-center gap-2 text-xs font-black text-amber-600 uppercase">
+                  <Download size={14} /> Yuklab olish (Print)
+                </button>
+              </div>
+            </div>
+
             <div className="bg-white p-6 rounded-[32px] custom-shadow text-center">
-              <p className="text-slate-400 italic">Tahrirlash rejimi faol.</p>
-              <button onClick={() => setView('home')} className="w-full mt-4 bg-slate-100 text-slate-600 py-4 rounded-2xl font-bold">Bosh sahifaga qaytish</button>
+              <p className="text-slate-400 italic mb-4 text-sm">Menyu tahrirlash qismi faol.</p>
+              <div className="space-y-3">
+                {menu.map(item => (
+                  <div key={item.id} className="flex items-center justify-between p-2 border-b border-slate-50 text-left">
+                    <span className="text-xs font-bold">{item.name}</span>
+                    <button onClick={() => setMenu(menu.filter(m => m.id !== item.id))} className="text-red-400"><Trash2 size={16}/></button>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => setView('home')} className="w-full mt-6 bg-slate-900 text-white py-4 rounded-2xl font-bold">
+                ASOSIYGA QAYTISH
+              </button>
             </div>
           </div>
         ) : view === 'cart' ? (
           <div className="space-y-6">
-            <h2 className="text-2xl font-black text-slate-900 px-2">Savatcha</h2>
+            <h2 className="text-2xl font-black text-slate-900 px-2 uppercase">Savatcha</h2>
             {cart.length === 0 ? (
               <div className="py-20 text-center">
                 <ShoppingBag size={48} className="mx-auto mb-4 text-slate-200" />
@@ -293,14 +305,22 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
                     </div>
                   </div>
                 ))}
-                <form onSubmit={sendOrder} className="bg-white p-6 rounded-[32px] custom-shadow space-y-4 mx-2">
-                  <input required name="name" placeholder="Ismingiz" className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-medium text-sm" />
-                  <textarea name="comment" placeholder="Izoh..." className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-medium text-sm h-24" />
+                <form onSubmit={sendOrder} className="bg-white p-6 rounded-[32px] custom-shadow space-y-4 mx-2 border border-amber-50">
+                  <input required name="name" placeholder="Ismingiz" className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-medium text-sm focus:ring-2 ring-amber-100" />
+                  <textarea name="comment" placeholder="Izoh..." className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-medium text-sm h-24 focus:ring-2 ring-amber-100" />
                   <div className="flex justify-between items-center px-2 pt-2 border-t border-dashed">
                     <span className="text-slate-400 font-bold uppercase text-[10px]">Jami summa</span>
                     <span className="text-xl font-black text-slate-900">{cartTotal.toLocaleString()} so'm</span>
                   </div>
-                  <button type="submit" className="w-full bg-amber-400 text-amber-950 py-5 rounded-[24px] font-black shadow-xl active:scale-95 transition-all">BUYURTMANI YUBORISH</button>
+                  <button 
+                    type="submit" 
+                    disabled={isSending}
+                    className={`w-full py-5 rounded-[24px] font-black shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 ${
+                      isSending ? 'bg-slate-200 text-slate-400' : 'bg-amber-400 text-amber-950 hover:bg-amber-500'
+                    }`}
+                  >
+                    {isSending ? <div className="w-5 h-5 border-2 border-slate-400 border-t-amber-600 rounded-full animate-spin" /> : 'BUYURTMANI YUBORISH'}
+                  </button>
                 </form>
               </div>
             )}
@@ -325,6 +345,7 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
         )}
       </main>
 
+      {/* Detail Modal */}
       <AnimatePresence>
         {selectedItem && (
           <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-4">
@@ -332,7 +353,7 @@ ${cart.map(item => `• ${item.name} x ${item.qty} (${(item.price * item.qty).to
             <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} className="bg-white w-full max-w-md rounded-[40px] overflow-hidden relative z-10 p-6">
               <button onClick={() => setSelectedItem(null)} className="absolute top-4 right-4 z-20 w-8 h-8 bg-black/5 rounded-full flex items-center justify-center"><X size={16} /></button>
               <img src={selectedItem.image} className="w-full h-48 object-cover rounded-[32px] mb-6 shadow-lg" />
-              <h2 className="text-2xl font-black text-slate-900 mb-2">{selectedItem.name}</h2>
+              <h2 className="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tighter">{selectedItem.name}</h2>
               <p className="text-slate-500 text-sm mb-6 leading-relaxed">{selectedItem.description}</p>
               <div className="flex items-center justify-between">
                 <span className="text-2xl font-black text-slate-900">{selectedItem.price.toLocaleString()} so'm</span>
