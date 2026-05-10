@@ -3,41 +3,42 @@
 @tailwind utilities;
 
 :root {
-  --primary: #f59e0b; /* Amber Yellow */
-  --panda-black: #111827;
+  --primary: #c5a059;
+  --gold: #c5a059;
+  --bg: #050505;
+  --surface: #0a0a0a;
 }
 
 body {
-  @apply bg-[#fefce8]/20 text-slate-900 antialiased font-sans selection:bg-amber-100 selection:text-amber-700;
-  -webkit-tap-highlight-color: transparent;
+  background-color: #050505 !important;
+  color: #ffffff !important;
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.luxury-card {
+  background: #0f0f0f !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 32px;
+}
+
+.gold-text {
+  background: linear-gradient(135deg, #fceabb 0%, #f8b500 50%, #fceabb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+}
+
+.gold-bg {
+  background: linear-gradient(135deg, #e3ad60 0%, #c5a059 100%) !important;
+}
+
+.glass-nav {
+  background: rgba(10, 10, 10, 0.8) !important;
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.glass {
-  @apply bg-white/80 backdrop-blur-md border border-white/20;
-}
-
-.glass-dark {
-  @apply bg-slate-900/90 backdrop-blur-lg border border-slate-700/30;
-}
-
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
-  100% { transform: translateY(0px); }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.custom-shadow {
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 4px 10px -5px rgba(0, 0, 0, 0.04);
 }
